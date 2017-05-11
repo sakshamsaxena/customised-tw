@@ -10,6 +10,7 @@
 */
 
 /* Based on Express for minimal obstruction and maximum scalability. */
+var path = require('path');
 var express = require('express');
 var bodyParser = require('body-parser');
 var request = require('superagent');
@@ -22,7 +23,10 @@ var config = require('./config/config.js');
 var app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
+app.set('views', path.join(__dirname, 'views'));
 app.set('json spaces', 4);
+app.set('view engine', 'pug');
 
 /* Root Route */
 app.get('/', function(req, res) {
@@ -64,7 +68,7 @@ app.get('/', function(req, res) {
 						}
 					}
 					/* Respond with the tweet object array. */
-					res.json(tweets);
+					res.render('Home', {data: tweets});
 					console.log("Got the Tweets!");
 				});
 		})

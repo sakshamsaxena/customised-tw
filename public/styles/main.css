@@ -1,0 +1,8 @@
+.card-content p {
+	clear: both;
+	margin: 0.2em;
+}
+.card-content img {
+	float: left;
+	margin: 0.5em;
+}
