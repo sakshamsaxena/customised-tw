@@ -15,12 +15,13 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var request = require('superagent');
 var base64 = require('base-64');
+var app = express();
 
 /* Keeping the sensitive configuration information separate from the logic. */
 var config = require('./config/config.js');
 
-/* Setting up the HTTP Server App of Express. */
-var app = express();
+/* Setting up the Configuration of Express App */
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -28,7 +29,15 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('json spaces', 4);
 app.set('view engine', 'pug');
 
+
+/*
+ *************
+ *Middlewares*
+ *************
+ */
+
 /* Authorization Middleware */
+
 function AuthApp(req, res, next) {
 	/* Create the Auth Key for using the API. */
 	var key = base64.encode(config.CONSUMER_PUBLIC + ':' + config.CONSUMER_SECRET);
@@ -50,12 +59,18 @@ function AuthApp(req, res, next) {
 		});
 }
 
+
+/*
+ ************
+ ***Routes***
+ ************
+ */
+
 /* 	Root Route 
 	TODO : Change this to an appropriate name while adding more routes for uniformity
 */
 app.get('/', AuthApp, function(req, res) {
-	/* Consume the API */
-	/* Use the Token to obtain the required tweets */
+	/* Consume the API by using the Token to obtain the required tweets */
 	var tweets = [];
 	request
 		.get('https://api.twitter.com/1.1/search/tweets.json?q=%23custserv&result_type=popular')
