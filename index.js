@@ -28,53 +28,52 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('json spaces', 4);
 app.set('view engine', 'pug');
 
-/* Root Route */
-app.get('/', function(req, res) {
+/* Authorization Middleware */
+function AuthApp(req, res, next) {
 	/* Create the Auth Key for using the API. */
 	var key = base64.encode(config.CONSUMER_PUBLIC + ':' + config.CONSUMER_SECRET);
 
-	/* Consume the API using Promises to ensure correct flow. */
-	new Promise(function(resolve, reject) {
-			/* Obtain the Access Token */
-			request
-				.post('https://api.twitter.com/oauth2/token')
-				.set('Authorization', 'Basic ' + key)
-				.set('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')
-				.send('grant_type=client_credentials')
-				.end(function(err, res) {
-					if (err) {
-						reject(err);
-					} else {
-						resolve(res.body.access_token);
-						console.log("Received the access token.");
-					}
-				});
-		})
-		.then(function(token) {
-			/* Use the Token to obtain the required tweets */
-			var tweets = [];
-			request
-				.get('https://api.twitter.com/1.1/search/tweets.json?q=%23custserv&result_type=popular')
-				.set('Authorization', 'Bearer ' + token)
-				.end(function(err, resp) {
-					if (err) {
-						throw err;
-					} else {
-						var response = resp.body.statuses;
-						/* Look for those tweets with a retweet count */
-						for (var i = 0; i < response.length; i++) {
-							if (response[i].retweet_count)
-								tweets.push(response[i]);
-						}
-					}
-					/* Respond with the tweet object array. */
-					res.render('Home', {data: tweets});
-					console.log("Got the Tweets!");
-				});
-		})
-		.catch(function(err) {
-			console.error(err);
-			process.exit(1);
+	/* Obtain the Access Token */
+	request
+		.post('https://api.twitter.com/oauth2/token')
+		.set('Authorization', 'Basic ' + key)
+		.set('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')
+		.send('grant_type=client_credentials')
+		.end(function(error, response) {
+			if (error) {
+				throw error;
+			} else {
+				req.token = response.body.access_token;
+				console.log("Received the access token.");
+			}
+			next();
+		});
+}
+
+/* 	Root Route 
+	TODO : Change this to an appropriate name while adding more routes for uniformity
+*/
+app.get('/', AuthApp, function(req, res) {
+	/* Consume the API */
+	/* Use the Token to obtain the required tweets */
+	var tweets = [];
+	request
+		.get('https://api.twitter.com/1.1/search/tweets.json?q=%23custserv&result_type=popular')
+		.set('Authorization', 'Bearer ' + req.token)
+		.end(function(err, resp) {
+			if (err) {
+				throw err;
+			} else {
+				var response = resp.body.statuses;
+				/* Look for those tweets with a retweet count */
+				for (var i = 0; i < response.length; i++) {
+					if (response[i].retweet_count)
+						tweets.push(response[i]);
+				}
+			}
+			/* Respond with the tweet object array. */
+			res.render('Home', { data: tweets });
+			console.log("Got the Tweets!");
 		});
 });
 
