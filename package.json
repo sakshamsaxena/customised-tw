@@ -4,7 +4,7 @@
   "description": "A simple server which displays customised tweets",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "postinstall": "node ./config/postinstall.js && node index.js"
   },
   "keywords": [
     "twitter"

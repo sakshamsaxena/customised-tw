@@ -16,7 +16,7 @@ var request = require('superagent');
 var base64 = require('base-64');
 
 /* Keeping the sensitive configuration information separate from the logic. */
-var config = require('./config.js');
+var config = require('./config/config.js');
 
 /* Setting up the HTTP Server App of Express. */
 var app = express();
@@ -57,11 +57,13 @@ app.get('/', function(req, res) {
 						throw err;
 					} else {
 						var response = resp.body.statuses;
+						/* Look for those tweets with a retweet count */
 						for (var i = 0; i < response.length; i++) {
 							if (response[i].retweet_count)
 								tweets.push(response[i]);
 						}
 					}
+					/* Respond with the tweet object array. */
 					res.json(tweets);
 					console.log("Got the Tweets!");
 				});
