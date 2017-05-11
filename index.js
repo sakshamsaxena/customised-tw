@@ -48,27 +48,28 @@ app.get('/', function(req, res) {
 		})
 		.then(function(token) {
 			/* Use the Token to obtain the required tweets */
+			var tweets = [];
 			request
 				.get('https://api.twitter.com/1.1/search/tweets.json?q=%23custserv&result_type=popular')
 				.set('Authorization', 'Bearer ' + token)
-				.end(function(err, res) {
+				.end(function(err, resp) {
 					if (err) {
-						reject(err);
+						throw err;
 					} else {
-						var data = res.body.statuses;
-						for (var i = 0; i < data.length; i++) {
-							if (data[i].retweet_count)
-								console.log(data[i].id_str, data[i].user.screen_name);
+						var response = resp.body.statuses;
+						for (var i = 0; i < response.length; i++) {
+							if (response[i].retweet_count)
+								tweets.push(response[i]);
 						}
 					}
+					res.json(tweets);
+					console.log("Got the Tweets!");
 				});
 		})
 		.catch(function(err) {
 			console.error(err);
 			process.exit(1);
 		});
-
-	res.send('foo');
 });
 
 /* Listen to the Port */
