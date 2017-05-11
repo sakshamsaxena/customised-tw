@@ -5,8 +5,8 @@ A simple server which displays customised tweets.
 ## Usage
 
 `
-git clone THIS_REPOSITORY
-cd THIS_REPOSITORY
+git clone https://github.com/sakshamsaxena/customised-tw.git  
+cd customised-tw  
 npm install
 `
 
